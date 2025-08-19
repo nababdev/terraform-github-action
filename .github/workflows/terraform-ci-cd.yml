@@ -1,33 +1,77 @@
-name: AWS S3 Bucket CI/CD
+name: Terraform CI/CD Workflow
 
 on:
   pull_request:
     branches:
       - main
+  # Remove the 'push' event trigger to prevent automatic deployment.
+  # push:
+  #  branches:
+  #    - main
 
 jobs:
-  terraform-ci:
+  terraform_ci:
+    name: Terraform Plan
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Run TFSec
-      run: tfsec --config-file tfsec.yml
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+          cli_config_path: ~/.terraform.d
 
-    - name: Run TFLint
-      run: tflint
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check
+        
+      - name: Terraform Init
+        id: init
+        run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan
+      - name: Run TFLint
+        uses: terraform-linters/tflint-action@v2
+        with:
+          tflint_args: "--config-file .tflint.hcl"
 
-  terraform-cd:
+      - name: Run TFSec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          tfsec_args: --config-file tfsec.yml
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+
+  terraform_cd:
+    name: Terraform Apply
+    needs: [terraform_ci]
+    # The 'if' condition is now redundant since the 'push' event is gone.
+    # We'll keep it for clarity, but the job will no longer be triggered.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
+    environment: production
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Terraform Apply
-      run: terraform apply -var "aws_credentials=$AWS_CREDENTIALS" --auto-approve
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0
+          cli_config_path: ~/.terraform.d
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
