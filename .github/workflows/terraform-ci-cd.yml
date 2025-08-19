@@ -32,10 +32,9 @@ jobs:
         run: terraform init
 
       - name: Run TFLint
-        uses: reviewdog/action-tflint@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tflint_version: "latest"
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+          tflint
 
       - name: Run TFSec
         uses: aquasecurity/tfsec-action@v1.0.0
@@ -69,7 +68,6 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.0.0
-          cli_config_path: ~/.terraform.d
 
       - name: Terraform Init
         run: terraform init
