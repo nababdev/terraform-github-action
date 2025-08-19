@@ -32,7 +32,7 @@ jobs:
         run: terraform init
 
       - name: Run TFLint
-        uses: terraform-linters/tflint-action@v2
+        uses: terraform-linters/tflint-action@v2.2.0
         with:
           tflint_args: "--config-file .tflint.hcl"
 
