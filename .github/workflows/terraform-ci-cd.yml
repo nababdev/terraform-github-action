@@ -32,9 +32,10 @@ jobs:
         run: terraform init
 
       - name: Run TFLint
-        uses: terraform-linters/tflint-action@v2.2.0
+        uses: reviewdog/action-tflint@master
         with:
-          tflint_args: "--config-file .tflint.hcl"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tflint_version: "latest"
 
       - name: Run TFSec
         uses: aquasecurity/tfsec-action@v1.0.0
