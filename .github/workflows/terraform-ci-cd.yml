@@ -40,9 +40,7 @@ jobs:
   terraform_cd:
     name: Terraform Apply
     needs: [terraform_ci]
-    # The 'if' condition is now redundant since the 'push' event is gone.
-    # We'll keep it for clarity, but the job will no longer be triggered.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
     runs-on: ubuntu-latest
     environment: production
     steps:
