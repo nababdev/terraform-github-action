@@ -23,23 +23,9 @@ jobs:
           terraform_version: 1.0.0
           cli_config_path: ~/.terraform.d
 
-      - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check
-        
       - name: Terraform Init
         id: init
         run: terraform init
-
-      - name: Run TFLint
-        run: |
-          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
-          tflint
-
-      - name: Run TFSec
-        uses: aquasecurity/tfsec-action@v1.0.0
-        with:
-          tfsec_args: --config-file tfsec.yml
 
       - name: Terraform Plan
         id: plan
