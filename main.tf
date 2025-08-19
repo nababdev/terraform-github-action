@@ -3,8 +3,8 @@ provider "aws" {
   credentials = var.aws_credentials
 }
 
-resource "aws_s3_bucket" "example_bucket" {
-  bucket = "example-bucket-name"
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "my-bucket-name"
   acl    = "private"
 }
 
